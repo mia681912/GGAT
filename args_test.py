@@ -3,9 +3,9 @@ import argparse
 
 def args_n():
     parser = argparse.ArgumentParser(description="GGAT_test")
-    parser.add_argument("--model_path", type=str, default='/home/fgg/file/GATformer_fusion/GAT/paper_harvard_nei12/', help="model path")
-    parser.add_argument("--data_path", type=str, default='/home/fgg/file/data/Harvard/Harvard/Harvard_test', help="test data path")
-    parser.add_argument("--save_path", type=str, default='Test/Harvard/', help="result save path")
+    parser.add_argument("--model_path", type=str, default='', help="model path")
+    parser.add_argument("--data_path", type=str, default='', help="test data path")
+    parser.add_argument("--save_path", type=str, default='Test/CAVE/', help="result save path")
     parser.add_argument("--ratio", type=int, default=8, help="down-sampling ratio")
     parser.add_argument("--txt_path", type=str, default='index.txt', help="index save path")
     parser.add_argument("--epochs", type=int, default=600, help="Number of save epochs")
