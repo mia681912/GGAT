@@ -3,7 +3,7 @@ import argparse
 
 def args_n():
     parser = argparse.ArgumentParser(description="GGATtrain")
-    parser.add_argument("--batchSize", type=int, default=32, help="Training batch size")
+    parser.add_argument("--batchSize", type=int, default=2, help="Training batch size")
     parser.add_argument("--epochs", type=int, default=600, help="Number of training epochs")
     parser.add_argument("--ckpt_step", type=int, default=100, help="Number of save epochs")
     parser.add_argument("--lr", type=float, default=1e-4, help="Initial learning rate")
@@ -13,12 +13,12 @@ def args_n():
     parser.add_argument("--ratio", type=int, default=8, help='resample ratio')
     parser.add_argument("--patch_size", type=int, default=64, help='size of patch')
     parser.add_argument("--num_img", type=int, default=13, help='size of patch num every image')
-    parser.add_argument("--val_path", type=str, default='/home/fgg/file/data/Harvard/Harvard/Harvard', help='val data root')
-    parser.add_argument("--test_path", type=str, default='/home/mzq/file_soft/data/cave', help='test data root')
-    parser.add_argument("--train_path", type=str, default='/home/fgg/file/data/Harvard/Harvard/Harvard', help='train data root')
-    parser.add_argument("--val_txt", type=str, default='/home/fgg/file/data/dataset_txt/harvard_valid.txt', help='val text path')
-    parser.add_argument("--train_txt", type=str, default='/home/fgg/file/data/dataset_txt/harvard_train.txt', help='train text path')
-    parser.add_argument("--respon_path", type=str, default='/home/fgg/file/data/respon/P_N_V2.mat', help='reaponse function mat')
+    parser.add_argument("--val_path", type=str, default='', help='val data root')
+    parser.add_argument("--test_path", type=str, default='', help='test data root')
+    parser.add_argument("--train_path", type=str, default='', help='train data root')
+    parser.add_argument("--val_txt", type=str, default='', help='val text path')
+    parser.add_argument("--train_txt", type=str, default='', help='train text path')
+    parser.add_argument("--respon_path", type=str, default='', help='reaponse function mat')
     parser.add_argument("--cudanum", type=str, default='1', help='cuda number')
     # model parameter
     parser.add_argument("--ms_channel", type=int, default=3, help='channel for HRMS image')
