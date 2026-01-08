@@ -4,9 +4,7 @@ High-frequency geometry enhanced graph attention network for hyperspectral and m
 # Dataset
 CAVE, Harvard, Pavia Center, Ziyuan-01
 
-CAVE:
-
-download: http://www.cs.columbia.edu/CAVE/databases/
+CAVE: http://www.cs.columbia.edu/CAVE/databases/
 
 How to make .mat dataset can refer to my blog:
 https://blog.csdn.net/fgjnghh/article/details/136590072?spm=1001.2014.3001.5502
@@ -23,7 +21,7 @@ python train.py --batch_size=2
 # Test the model
 python test.py
 
-Comparative model link:
+# Comparative model link:
 
 IR-TenSR: https://github.com/liangjiandeng/IR_TenSR
 
