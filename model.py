@@ -110,14 +110,14 @@ class SEDE(nn.Module):
             nn.Conv2d(self.hs_feature // 4, self.hs_feature // 2, kernel_size=1),
             # nn.BatchNorm2d(self.hs_feature // 2),
             nn.LeakyReLU(),
-            nn.Conv2d(self.hs_feature // 2, self.out_feature, kernel_size=1),
+            nn.Conv2d(self.hs_feature // 2, self.hs_feature, kernel_size=1),
             # nn.BatchNorm2d(self.hs_feature),
             nn.LeakyReLU(),
-            nn.Conv2d(self.out_feature, self.out_feature, kernel_size=3, padding=1),
+            nn.Conv2d(self.hs_feature, self.hs_feature, kernel_size=3, padding=1),
         )
 
     def forward(self, x):
-        x = self.hs_end1(x)
+        x = self.hs_end(x)
         x = x * self.ct(x)
         x = self.hs_dec(x)
 
