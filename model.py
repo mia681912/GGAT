@@ -75,15 +75,15 @@ class SpatialGATtention(nn.Module):
         return patches
 
 
-class CAEncoder(nn.Module):
+class SEDE(nn.Module):
     def __init__(self, in_channel, hs_feature):
-        super(CAEncoder, self).__init__()
+        super(SEDE, self).__init__()
 
         self.in_channel = in_channel
         self.hs_feature = hs_feature
 
         self.ct = ChannelAttention(self.hs_feature // 8, 2)
-        self.hs_fea1 = nn.Sequential(
+        self.hs_end = nn.Sequential(
             nn.Conv2d(self.hs_feature, self.hs_feature, kernel_size=3, padding=1),
             # nn.BatchNorm2d(self.hs_feature),
             nn.LeakyReLU(),
@@ -100,21 +100,7 @@ class CAEncoder(nn.Module):
             nn.Conv2d(self.hs_feature // 8, self.hs_feature // 8, kernel_size=3, padding=1)
         )
 
-    def forward(self, x):
-        x = self.hs_fea1(x)
-        x = x * self.ct(x)
-
-        return x
-
-
-class CADencoder(nn.Module):
-    def __init__(self, hs_feature, out_feature):
-        super(CADencoder, self).__init__()
-
-        self.out_feature = out_feature
-        self.hs_feature = hs_feature
-
-        self.hs_fea1 = nn.Sequential(
+        self.hs_dec = nn.Sequential(
             nn.Conv2d(self.hs_feature // 8, self.hs_feature // 8, kernel_size=3, padding=1),
             # nn.BatchNorm2d(self.hs_feature // 8),
             nn.LeakyReLU(),
@@ -131,7 +117,9 @@ class CADencoder(nn.Module):
         )
 
     def forward(self, x):
-        x = self.hs_fea1(x)
+        x = self.hs_end1(x)
+        x = x * self.ct(x)
+        x = self.hs_dec(x)
 
         return x
 
@@ -186,9 +174,9 @@ class Res_bottle(nn.Module):
         return out
 
 
-class CMFP(nn.Module):
+class GMSF(nn.Module):
     def __init__(self, hsi_channels, msi_channels, out_channels):
-        super().__init__()
+        super(GMSF, self).__init__()
 
         self.hsi_convs = nn.ModuleList([
             nn.Sequential(
@@ -330,9 +318,9 @@ class SpaEmbe(nn.Module):
         return out3
 
 
-class Fea_at(nn.Module):
+class CSSA(nn.Module):
     def __init__(self, hs_feature):
-        super(Fea_at, self).__init__()
+        super(CSSA, self).__init__()
         
         self.hs_feature = hs_feature
         self.spa_att = SpatialAttention()
@@ -407,7 +395,6 @@ class Fea_at(nn.Module):
 class GATmodel(nn.Module):
     def __init__(self, ms_inchannel, hs_inchannel, ratio, w_size, stride, dropout, alpha,
                  ms_feature, hs_feature, neigh):
-
         super(GATmodel, self).__init__()
 
         self.ms_inchannel = ms_inchannel
@@ -418,9 +405,9 @@ class GATmodel(nn.Module):
         self.hs_feature = hs_feature
         self.ms_feature = ms_feature
         self.ms_inchannel1 = self.ms_feature // 8
-        self.cmfp1 = CMFP(self.hs_feature, self.ms_feature, self.hs_feature)
-        self.cmfp2 = CMFP(self.hs_feature, self.ms_feature, self.hs_feature)
-        self.cmfp3 = CMFP(self.hs_feature, self.ms_feature, self.hs_feature)
+        self.gmsf1 = GMSF(self.hs_feature, self.ms_feature, self.hs_feature)
+        self.gmsf2 = GMSF(self.hs_feature, self.ms_feature, self.hs_feature)
+        self.gmsf3 = GMSF(self.hs_feature, self.ms_feature, self.hs_feature)
 
         self.gt_att = SRAttention(self.hs_feature, self.hs_feature, 3)
         # self.conv_hs = nn.Conv2d(self.hs_inchannel, self.hs_feature, kernel_size=3, padding=1)
@@ -433,13 +420,9 @@ class GATmodel(nn.Module):
             # nn.Conv2d(self.hs_feature, self.hs_feature * 8 * 8, kernel_size=3, padding=1)
         )
 
-        self.encoder1 = CAEncoder(self.hs_feature, self.hs_feature)
-        self.encoder2 = CAEncoder(self.hs_feature, self.hs_feature)
-        self.encoder3 = CAEncoder(self.hs_feature, self.hs_feature)
+        self.sede1 = SEDE(self.hs_feature, self.hs_feature)
+        self.sede2 = SEDE(self.hs_feature, self.hs_feature)
 
-        self.decoder1 = CADencoder(self.hs_feature, self.hs_feature)
-        self.decoder2 = CADencoder(self.hs_feature, self.hs_feature)
-        self.decoder3 = CADencoder(self.hs_feature, self.hs_feature)
 
         self.spa_graph1 = SpatialGATtention(self.ms_feature, self.ms_inchannel1,
                                             self.ms_inchannel1 * self.w_size * self.w_size,
@@ -447,16 +430,6 @@ class GATmodel(nn.Module):
                                             dropout, alpha, w_size, stride, self.hs_feature, neigh)
 
         self.spa_graph2 = SpatialGATtention(self.ms_feature, self.ms_inchannel1,
-                                            self.ms_inchannel1 * self.w_size * self.w_size,
-                                            self.ms_inchannel1 * self.w_size * self.w_size,
-                                            dropout, alpha, w_size, stride, self.hs_feature, neigh)
-
-        self.spa_graph3 = SpatialGATtention(self.ms_feature, self.ms_inchannel1,
-                                            self.ms_inchannel1 * self.w_size * self.w_size,
-                                            self.ms_inchannel1 * self.w_size * self.w_size,
-                                            dropout, alpha, w_size, stride, self.hs_feature, neigh)
-
-        self.spa_graph4 = SpatialGATtention(self.ms_feature, self.ms_inchannel1,
                                             self.ms_inchannel1 * self.w_size * self.w_size,
                                             self.ms_inchannel1 * self.w_size * self.w_size,
                                             dropout, alpha, w_size, stride, self.hs_feature, neigh)
@@ -470,7 +443,7 @@ class GATmodel(nn.Module):
         self.fusion_gt = nn.Conv2d(int(2 * self.hs_feature), self.hs_feature, kernel_size=1)
         self.fusion_att = nn.Conv2d(int(self.hs_feature), self.hs_feature, 1)
         self.fusion_ms = nn.Sequential(
-            nn.Conv2d(int(2*self.hs_feature), self.hs_feature, 1),
+            nn.Conv2d(int(2 * self.hs_feature), self.hs_feature, 1),
         )
         self.fusion_ms1 = nn.Sequential(
             nn.Conv2d(int(self.hs_feature), self.hs_feature, 1),
@@ -488,9 +461,8 @@ class GATmodel(nn.Module):
             Res_bottle(self.hs_feature)
         )
 
-        self.at1 = Fea_at(self.hs_feature)
-        self.at2 = Fea_at(self.hs_feature)
-        self.at3 = Fea_at(self.hs_feature)
+        self.cssa1 = CSSA(self.hs_feature)
+        self.cssa2 = CSSA(self.hs_feature)
 
         self.gt_out = nn.Conv2d(int(self.hs_feature), self.hs_inchannel, kernel_size=3, padding=1)
 
@@ -499,10 +471,9 @@ class GATmodel(nn.Module):
         lrgt1 = self.fusion_up2(torch.cat([lrout, hrms], 1))
         hrms = self.conv_ms(hrms)
 
-        lrgt1, hrms = self.cmfp1(lrgt1, hrms)
+        lrgt1, hrms = self.gmsf1(lrgt1, hrms)
 
-        lrgt_low = self.encoder1(lrgt1)
-        lrgt_gap = self.decoder1(lrgt_low)
+        lrgt_gap = self.sede1(lrgt1)
 
         grad = abs(self.Grad_x(hrms)) + abs(self.Grad_y(hrms))
         lrgt_grad = abs(self.Grad_x(lrgt1)) + abs(self.Grad_y(lrgt1))
@@ -515,14 +486,13 @@ class GATmodel(nn.Module):
         lrgt1 = self.fusion(lrgt_gap, msgt_gap1, msgt_gapx)
         lrgt1 = self.res1(lrgt1)
 
-        lrgt_low = self.encoder2(lrgt1)
-        lrgt1 = self.decoder2(lrgt_low)
-        lrgt1, hrms = self.cmfp2(lrgt1, hrms)
-        lrgt1, hrms = self.at2(lrgt1, hrms)
+        lrgt1 = self.sede2(lrgt1)
+        lrgt1, hrms = self.gmsf2(lrgt1, hrms)
+        lrgt1, hrms = self.cssa1(lrgt1, hrms)
 
-        lrgt1, hrms = self.cmfp3(lrgt1, hrms)
-        lrgt1, hrms = self.at3(lrgt1, hrms)
-         
+        lrgt1, hrms = self.gmsf3(lrgt1, hrms)
+        lrgt1, hrms = self.cssa2(lrgt1, hrms)
+
         out = self.gt_out(lrgt1) + lrout
 
         return out
@@ -536,3 +506,4 @@ class GATmodel(nn.Module):
         gra_y = torch.cat((x[:, :, :, 1:], x[:, :, :, -1].unsqueeze(3)), dim=3) - x
 
         return gra_y
+
