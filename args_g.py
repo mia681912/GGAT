@@ -27,7 +27,7 @@ def args_n():
     parser.add_argument("--alpha", type=float, default=0.2, help='parameter of nonlinear function')
     parser.add_argument("--hs_feature", type=int, default=64, help='channels for HSI')
     parser.add_argument("--ms_feature", type=int, default=64, help='channel for MSI')
-    parser.add_argument("--neigh", type=int, default=24, help='neighbors')
+    parser.add_argument("--neigh", type=int, default=8, help='neighbors')
     parser.add_argument("--w_size", type=int, default=16, help='window size')
     parser.add_argument("--stride", type=int, default=8, help='stride')
     opt = parser.parse_args()
